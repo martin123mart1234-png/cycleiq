@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CycleIQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#07090d;--sf:#0d1117;--sf2:#131920;
+  --bd:#1f2d3d;--bd2:#263545;
+  --ac:#00d4ff;--acd:rgba(0,212,255,0.12);
+  --gn:#00ff88;--gnd:rgba(0,255,136,0.10);
+  --rd:#ff4466;--rdd:rgba(255,68,102,0.10);
+  --yw:#ffcc00;--ywd:rgba(255,204,0,0.10);
+  --pu:#bb88ff;
+  --tx:#dce8f0;--mt:#4a6a7a;
+  --fd:'Bebas Neue',sans-serif;
+  --fb:'Syne',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:15px 28px;border-bottom:1px solid var(--bd);background:rgba(7,9,13,.97);position:sticky;top:0;z-index:100;backdrop-filter:blur(14px);}
+.logo{font-family:var(--fd);font-size:26px;letter-spacing:4px;color:var(--ac);text-shadow:0 0 18px rgba(0,212,255,.4);}
+.logo span{color:var(--tx);}
+.hdr-date{font-family:var(--fm);font-size:11px;color:var(--mt);}
+
+#doseBanner{background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(0,255,136,.04));border-bottom:1px solid rgba(0,212,255,.18);padding:9px 28px;display:none;}
+.dbi{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.dbl{font-family:var(--fm);font-size:9px;letter-spacing:3px;color:var(--ac);text-transform:uppercase;}
+.dpill{font-family:var(--fm);font-size:11px;padding:3px 11px;border:1px solid rgba(0,212,255,.3);background:var(--acd);}
+.dpill.dn{border-color:var(--gn);background:var(--gnd);color:var(--gn);}
+.dpill.dt{border-color:var(--yw);background:var(--ywd);color:var(--yw);}
+
+.nav{display:flex;gap:2px;padding:10px 28px;border-bottom:1px solid var(--bd);overflow-x:auto;background:var(--sf);}
+.nb{font-family:var(--fm);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;background:transparent;border:1px solid transparent;color:var(--mt);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.nb:hover{color:var(--tx);border-color:var(--bd2);}
+.nb.on{border-color:var(--ac);color:var(--ac);background:var(--acd);}
+
+.main{max-width:1280px;margin:0 auto;padding:26px;}
+.page{display:none;}
+.page.on{display:block;}
+
+.st{font-family:var(--fd);font-size:36px;letter-spacing:3px;margin-bottom:2px;}
+.ss{font-family:var(--fm);font-size:10px;color:var(--mt);letter-spacing:3px;text-transform:uppercase;margin-bottom:22px;}
+
+.card{background:var(--sf);border:1px solid var(--bd);padding:20px;margin-bottom:16px;}
+.cl{font-family:var(--fm);font-size:9px;letter-spacing:3px;color:var(--ac);text-transform:uppercase;margin-bottom:11px;}
+.ca{border-left:3px solid var(--ac);}
+.cg{border-left:3px solid var(--gn);}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr;}.main{padding:12px;}}
+
+.fl{margin-bottom:13px;}
+.fl label{display:block;font-family:var(--fm);font-size:9px;letter-spacing:2px;color:var(--mt);text-transform:uppercase;margin-bottom:5px;}
+.fl input,.fl select,.fl textarea{width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:8px 11px;font-family:var(--fm);font-size:12px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.fl select option{background:var(--sf);}
+.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--ac);}
+.fl textarea{resize:vertical;min-height:68px;}
+input[type=range]{padding:4px 0;accent-color:var(--ac);}
+.sv{font-family:var(--fm);font-size:12px;color:var(--ac);margin-top:3px;}
+
+.btn{font-family:var(--fm);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:9px 18px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.bp{background:var(--ac);color:var(--bg);font-weight:700;}
+.bp:hover{background:#22e0ff;box-shadow:0 0 16px rgba(0,212,255,.3);}
+.bg2{background:var(--gn);color:var(--bg);font-weight:700;}
+.bg2:hover{box-shadow:0 0 16px rgba(0,255,136,.3);}
+.bgh{background:transparent;border:1px solid var(--bd);color:var(--mt);}
+.bgh:hover{border-color:var(--ac);color:var(--ac);}
+.bsm{padding:5px 11px;font-size:10px;}
+.bbl{width:100%;justify-content:center;padding:12px;}
+
+.badge{display:inline-block;font-family:var(--fm);font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border:1px solid;}
+.bact{color:var(--gn);border-color:var(--gn);background:var(--gnd);}
+.bend{color:var(--mt);border-color:var(--mt);}
+
+.met{text-align:center;padding:16px;background:var(--sf2);border:1px solid var(--bd);}
+.mv{font-family:var(--fd);font-size:42px;color:var(--ac);line-height:1;text-shadow:0 0 14px rgba(0,212,255,.22);}
+.mu{font-family:var(--fm);font-size:9px;color:var(--mt);letter-spacing:2px;margin-top:3px;}
+.ml{font-size:11px;color:var(--mt);margin-top:5px;}
+.mdel{font-family:var(--fm);font-size:10px;margin-top:3px;}
+.dup{color:var(--gn);}
+.ddn{color:var(--rd);}
+
+.fscl{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.fbtn{flex:1;min-width:44px;padding:9px 4px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;font-family:var(--fm);font-size:12px;text-align:center;transition:all .2s;}
+.fbtn:hover{border-color:var(--ac);color:var(--ac);background:var(--acd);}
+.fbtn.sbad{border-color:var(--rd);color:var(--rd);background:var(--rdd);}
+.fbtn.sok{border-color:var(--yw);color:var(--yw);background:var(--ywd);}
+.fbtn.sgd{border-color:var(--gn);color:var(--gn);background:var(--gnd);}
+
+.crow{display:grid;grid-template-columns:2fr 80px 90px 90px 85px 28px;gap:7px;align-items:end;margin-bottom:7px;background:var(--sf2);padding:10px;border:1px solid var(--bd);}
+@media(max-width:700px){.crow{grid-template-columns:1fr 1fr;}}
+
+.dc{background:var(--sf2);border:1px solid var(--bd);padding:13px 16px;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.dc.dn{border-color:var(--gn);background:var(--gnd);}
+.dc.ds{border-color:var(--yw);background:var(--ywd);}
+.dname{font-weight:700;font-size:14px;}
+.dmeta{font-family:var(--fm);font-size:10px;color:var(--mt);margin-top:2px;}
+.dtime{font-family:var(--fd);font-size:22px;letter-spacing:2px;color:var(--ac);}
+.dtime.g{color:var(--gn);}
+.dtime.y{color:var(--yw);}
+
+.le{display:flex;gap:13px;padding:12px 0;border-bottom:1px solid var(--bd2);align-items:flex-start;}
+.ldot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.ldate{font-family:var(--fm);font-size:10px;color:var(--mt);min-width:82px;}
+.ltxt{font-size:13px;line-height:1.5;}
+
+.cwrap{position:relative;height:210px;margin-top:11px;}
+.ctabs{display:flex;gap:3px;margin-bottom:12px;flex-wrap:wrap;}
+.ctab{font-family:var(--fm);font-size:10px;letter-spacing:2px;padding:5px 12px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;transition:all .2s;}
+.ctab:hover{border-color:var(--bd2);color:var(--tx);}
+.ctab.on{border-color:var(--ac);color:var(--ac);background:var(--acd);}
+
+.bwt{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px;}
+.bwt th{text-align:left;padding:8px 11px;color:var(--mt);font-size:9px;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--bd);}
+.bwt td{padding:8px 11px;border-bottom:1px solid var(--bd2);}
+.bwt tr:hover td{background:rgba(0,212,255,.02);}
+.vhi{color:var(--rd);}
+.vlo{color:var(--yw);}
+.vok{color:var(--gn);}
+
+.pw{margin:9px 0;}
+.pl{display:flex;justify-content:space-between;font-family:var(--fm);font-size:9px;color:var(--mt);letter-spacing:1px;margin-bottom:5px;}
+.pb{height:3px;background:var(--bd);overflow:hidden;}
+.pf{height:100%;background:linear-gradient(90deg,var(--ac),var(--gn));transition:width .6s ease;}
+
+.air{background:var(--sf2);border:1px solid rgba(0,212,255,.2);border-left:3px solid var(--ac);padding:18px;margin-top:16px;display:none;}
+.air.show{display:block;}
+.aihdr{font-family:var(--fm);font-size:9px;letter-spacing:3px;color:var(--ac);text-transform:uppercase;margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+.aidot{width:6px;height:6px;background:var(--ac);border-radius:50%;animation:pulse 1.5s infinite;}
+.aitxt{font-size:13px;line-height:1.8;color:var(--tx);white-space:pre-wrap;font-family:var(--fm);}
+
+.lbar{width:100%;height:2px;background:var(--bd);margin:9px 0;overflow:hidden;display:none;}
+.lbar.on{display:block;}
+.lbar::after{content:'';display:block;width:35%;height:100%;background:var(--ac);animation:ld 1.1s infinite;}
+
+.rres{background:var(--sf2);border:1px solid var(--gn);padding:15px;margin-top:14px;display:none;}
+.rres.show{display:block;}
+.rline{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd2);font-family:var(--fm);font-size:12px;}
+.rline:last-child{border:none;}
+.rline strong{color:var(--gn);}
+.rres.blue{border-color:var(--ac);}
+.rres.blue .rline strong{color:var(--ac);}
+
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:7px;}
+@media(max-width:600px){.sgrid{grid-template-columns:1fr 1fr;}}
+.si{padding:7px 9px;border:1px solid var(--bd);cursor:pointer;font-size:12px;color:var(--mt);transition:all .2s;user-select:none;}
+.si:hover{border-color:var(--bd2);color:var(--tx);}
+.si.chk{border-color:var(--rd);background:var(--rdd);color:var(--tx);}
+
+.cyc{background:var(--sf);border:1px solid var(--bd);padding:16px 20px;margin-bottom:13px;}
+.cych{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px;}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
+.chip{font-family:var(--fm);font-size:10px;padding:3px 9px;border:1px solid var(--bd);color:var(--mt);background:var(--sf2);}
+.chip em{color:var(--ac);font-style:normal;margin-left:3px;}
+
+.akbox{background:var(--sf2);border:1px solid var(--yw);padding:14px;margin-bottom:16px;}
+.akbox label{display:block;font-family:var(--fm);font-size:9px;letter-spacing:2px;color:var(--yw);text-transform:uppercase;margin-bottom:5px;}
+.akbox input{width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:8px 11px;font-family:var(--fm);font-size:12px;outline:none;}
+.akbox input:focus{border-color:var(--yw);}
+.aknote{font-family:var(--fm);font-size:10px;color:var(--mt);margin-top:7px;}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--sf);border:1px solid var(--ac);color:var(--tx);padding:11px 18px;font-family:var(--fm);font-size:11px;z-index:9999;display:none;}
+
+.empty{text-align:center;padding:40px 20px;color:var(--mt);}
+.eico{font-size:32px;margin-bottom:11px;opacity:.35;}
+.etxt{font-family:var(--fm);font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+.mt8{margin-top:8px;}.mt12{margin-top:12px;}.mt16{margin-top:16px;}.mt20{margin-top:20px;}
+.rb{background:transparent;border:none;color:var(--rd);cursor:pointer;font-size:17px;opacity:.6;transition:opacity .2s;line-height:1;}
+.rb:hover{opacity:1;}
+
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes ld{0%{transform:translateX(-100%);}100%{transform:translateX(380%);}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">CYCLE<span>IQ</span></div>
+  <div class="hdr-date" id="hdrDate"></div>
+</div>
+
+<div id="doseBanner">
+  <div class="dbi">
+    <span class="dbl">Doses Due Today</span>
+    <div id="dosePills"></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nb on" onclick="showPage('dashboard')">Dashboard</button>
+  <button class="nb" onclick="showPage('schedule')">Dose Schedule</button>
+  <button class="nb" onclick="showPage('cycles')">My Cycles</button>
+  <button class="nb" onclick="showPage('checkin')">Check-In</button>
+  <button class="nb" onclick="showPage('metrics')">Metrics &amp; Labs</button>
+  <button class="nb" onclick="showPage('charts')">Charts</button>
+  <button class="nb" onclick="showPage('ai')">AI Analysis</button>
+  <button class="nb" onclick="showPage('calculator')">Calculators</button>
+  <button class="nb" onclick="showPage('log')">Log</button>
+</nav>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="page on">
+  <div class="st">Dashboard</div>
+  <div class="ss">Performance Overview</div>
+  <div class="g4">
+    <div class="met"><div class="mv" id="d-wt">--</div><div class="mu">LBS</div><div class="ml">Weight</div><div class="mdel" id="d-wtd"></div></div>
+    <div class="met"><div class="mv" id="d-bf">--</div><div class="mu">%</div><div class="ml">Body Fat</div></div>
+    <div class="met"><div class="mv" id="d-bp">--</div><div class="mu">SYS mmHg</div><div class="ml">Blood Pressure</div></div>
+    <div class="met"><div class="mv" id="d-feel">--</div><div class="mu">/ 10</div><div class="ml">Last Feeling</div></div>
+  </div>
+  <div class="g2 mt16">
+    <div class="card ca"><div class="cl">Active Cycle</div><div id="dashCycle"><div class="empty"><div class="eico">&#8856;</div><div class="etxt">No active cycle</div></div></div></div>
+    <div class="card"><div class="cl">Next Doses</div><div id="dashDoses"><div class="empty"><div class="etxt">No cycle active</div></div></div></div>
+  </div>
+  <div class="g2 mt16">
+    <div class="card"><div class="cl">Recent Log</div><div id="dashLog"><div class="empty"><div class="etxt">Nothing yet</div></div></div></div>
+    <div class="card"><div class="cl">Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <button class="btn bp bbl" onclick="showPage('checkin')">&#9654; Daily Check-In</button>
+        <button class="btn bgh bbl" onclick="showPage('schedule')">Dose Schedule</button>
+        <button class="btn bgh bbl" onclick="showPage('metrics')">+ Log Metrics / Labs</button>
+        <button class="btn bgh bbl" onclick="showPage('ai')">AI Analysis</button>
+        <button class="btn bgh bbl" onclick="showPage('calculator')">Calculators</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOSE SCHEDULE -->
+<div id="pg-schedule" class="page">
+  <div class="st">Dose Schedule</div>
+  <div class="ss">What to take and when</div>
+  <div id="scheduleContent"><div class="empty"><div class="eico">&#128138;</div><div class="etxt">No active cycle</div></div></div>
+</div>
+
+<!-- CYCLES -->
+<div id="pg-cycles" class="page">
+  <div class="st">My Cycles</div>
+  <div class="ss">Build and Manage Protocols</div>
+  <div class="card">
+    <div class="cl">New Cycle</div>
+    <div class="g2">
+      <div class="fl"><label>Cycle Name</label><input type="text" id="cycleName" placeholder="e.g. Summer Blast 2025"></div>
+      <div class="fl"><label>Cycle Type</label>
+        <select id="cycleType">
+          <option>Bulk</option><option>Cut</option><option>Recomp</option>
+          <option>TRT / Cruise</option><option>PCT</option><option>Peptide Protocol</option>
+          <option>SARM Cycle</option><option>Lean Gains</option><option>Custom</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="fl"><label>Start Date</label><input type="date" id="cycleStart"></div>
+      <div class="fl"><label>Duration (weeks)</label><input type="number" id="cycleDuration" placeholder="12" min="1" max="52"></div>
+    </div>
+    <div class="cl" style="margin-top:13px;">Compounds</div>
+    <div id="compoundsList"></div>
+    <button class="btn bgh mt8" onclick="addCompRow()">+ Add Compound</button>
+    <div class="fl mt16"><label>Notes / Ancillaries / Goals</label><textarea id="cycleNotes" placeholder="AI schedule, support supps, goals..."></textarea></div>
+    <div class="mt16"><button class="btn bp" onclick="saveCycle()">Save and Activate Cycle</button></div>
+  </div>
+  <div class="mt20"><div class="cl">All Cycles</div><div id="cycleList"><div class="empty"><div class="eico">&#8856;</div><div class="etxt">No cycles yet</div></div></div></div>
+</div>
+
+<!-- CHECK-IN -->
+<div id="pg-checkin" class="page">
+  <div class="st">Daily Check-In</div>
+  <div class="ss" id="ciDate"></div>
+  <div id="alreadyIn" style="display:none;" class="card cg">
+    <div class="cl">Already Checked In Today</div>
+    <p style="color:var(--mt);font-size:14px;">Come back tomorrow.</p>
+    <button class="btn bgh mt12" onclick="forceCI()">Log Anyway (Override)</button>
+  </div>
+  <div id="ciForm">
+    <div class="card"><div class="cl">Overall Feeling (1-10)</div><div class="fscl" id="feelScale"></div></div>
+    <div class="g2">
+      <div class="card">
+        <div class="cl">Performance Metrics</div>
+        <div class="fl"><label>Energy Level</label><input type="range" id="ciEnergy" min="1" max="10" value="5" oninput="document.getElementById('ciEnergyV').textContent=this.value+'/10'"><div class="sv"><span id="ciEnergyV">5/10</span></div></div>
+        <div class="fl"><label>Mood / Mental Wellbeing</label><input type="range" id="ciMood" min="1" max="10" value="5" oninput="document.getElementById('ciMoodV').textContent=this.value+'/10'"><div class="sv"><span id="ciMoodV">5/10</span></div></div>
+        <div class="fl"><label>Libido</label><input type="range" id="ciLibido" min="1" max="10" value="5" oninput="document.getElementById('ciLibidoV').textContent=this.value+'/10'"><div class="sv"><span id="ciLibidoV">5/10</span></div></div>
+        <div class="fl"><label>Sleep Quality</label><input type="range" id="ciSleep" min="1" max="10" value="5" oninput="document.getElementById('ciSleepV').textContent=this.value+'/10'"><div class="sv"><span id="ciSleepV">5/10</span></div></div>
+        <div class="fl"><label>Training Performance</label><input type="range" id="ciPerf" min="1" max="10" value="5" oninput="document.getElementById('ciPerfV').textContent=this.value+'/10'"><div class="sv"><span id="ciPerfV">5/10</span></div></div>
+        <div class="fl"><label>Aggression / Drive</label><input type="range" id="ciDrive" min="1" max="10" value="5" oninput="document.getElementById('ciDriveV').textContent=this.value+'/10'"><div class="sv"><span id="ciDriveV">5/10</span></div></div>
+        <div class="fl"><label>Appetite</label><input type="range" id="ciAppetite" min="1" max="10" value="5" oninput="document.getElementById('ciAppetiteV').textContent=this.value+'/10'"><div class="sv"><span id="ciAppetiteV">5/10</span></div></div>
+        <div class="fl"><label>Pump / Vascularity</label><input type="range" id="ciPump" min="1" max="10" value="5" oninput="document.getElementById('ciPumpV').textContent=this.value+'/10'"><div class="sv"><span id="ciPumpV">5/10</span></div></div>
+      </div>
+      <div class="card"><div class="cl">Side Effects / Symptoms</div><div class="sgrid" id="symptomGrid"></div></div>
+    </div>
+    <div class="card">
+      <div class="cl">Vitals (Optional)</div>
+      <div class="g3">
+        <div class="fl"><label>Weight (lbs)</label><input type="number" id="ciWeight" placeholder="185"></div>
+        <div class="fl"><label>Blood Pressure</label><input type="text" id="ciBP" placeholder="130/80"></div>
+        <div class="fl"><label>Heart Rate (bpm)</label><input type="number" id="ciHR" placeholder="68"></div>
+      </div>
+      <div class="g3">
+        <div class="fl"><label>Waist (in)</label><input type="number" id="ciWaist" placeholder="34" step="0.25"></div>
+        <div class="fl"><label>Body Temp (F)</label><input type="number" id="ciTemp" placeholder="98.6" step="0.1"></div>
+        <div class="fl"><label>Fasting Glucose</label><input type="number" id="ciGlucose" placeholder="90"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cl">Injection Site (if applicable)</div>
+      <div class="g2">
+        <div class="fl"><label>Site Used</label>
+          <select id="ciSite">
+            <option value="">N/A</option><option>Left Glute</option><option>Right Glute</option>
+            <option>Left Quad</option><option>Right Quad</option><option>Left Delt</option>
+            <option>Right Delt</option><option>Left VG</option><option>Right VG</option>
+            <option>Abdomen (SubQ)</option><option>Thigh (SubQ)</option>
+          </select>
+        </div>
+        <div class="fl"><label>Site Reaction</label>
+          <select id="ciSiteRx">
+            <option value="">None</option><option>Slight soreness</option>
+            <option>Moderate soreness</option><option>PIP / Hard lump</option>
+            <option>Redness/swelling</option><option>Bruising</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="cl">Notes</div><div class="fl"><textarea id="ciNotes" placeholder="Workout log, diet notes, anything unusual..."></textarea></div></div>
+    <button class="btn bp bbl" style="font-size:14px;padding:15px;" onclick="submitCI()">Submit Check-In</button>
+  </div>
+</div>
+
+<!-- METRICS & LABS -->
+<div id="pg-metrics" class="page">
+  <div class="st">Metrics and Labs</div>
+  <div class="ss">Body Data and Bloodwork</div>
+  <div class="g2">
+    <div class="card">
+      <div class="cl">Log Body Metrics</div>
+      <div class="fl"><label>Date</label><input type="date" id="mDate"></div>
+      <div class="g2"><div class="fl"><label>Weight (lbs)</label><input type="number" id="mWeight" placeholder="185"></div><div class="fl"><label>Body Fat %</label><input type="number" id="mBf" placeholder="15" step="0.1"></div></div>
+      <div class="fl"><label>Blood Pressure</label><input type="text" id="mBP" placeholder="130/80"></div>
+      <div class="g2"><div class="fl"><label>Heart Rate (bpm)</label><input type="number" id="mHR" placeholder="68"></div><div class="fl"><label>Waist (in)</label><input type="number" id="mWaist" placeholder="34" step="0.25"></div></div>
+      <div class="g2"><div class="fl"><label>Chest (in)</label><input type="number" id="mChest" step="0.25" placeholder="42"></div><div class="fl"><label>Arms (in)</label><input type="number" id="mArms" step="0.25" placeholder="16"></div></div>
+      <button class="btn bp" onclick="saveMetric()">Save Metrics</button>
+    </div>
+    <div class="card">
+      <div class="cl">Log Bloodwork</div>
+      <div class="fl"><label>Lab Date</label><input type="date" id="bwDate"></div>
+      <div class="g2"><div class="fl"><label>Total Testosterone (ng/dL)</label><input type="number" id="bwTT" placeholder="800"></div><div class="fl"><label>Free T (pg/mL)</label><input type="number" id="bwFT" placeholder="20"></div></div>
+      <div class="g2"><div class="fl"><label>Estradiol E2 (pg/mL)</label><input type="number" id="bwE2" placeholder="30"></div><div class="fl"><label>Hematocrit (%)</label><input type="number" id="bwHCT" placeholder="45" step="0.1"></div></div>
+      <div class="g2"><div class="fl"><label>Hemoglobin (g/dL)</label><input type="number" id="bwHGB" placeholder="15" step="0.1"></div><div class="fl"><label>PSA (ng/mL)</label><input type="number" id="bwPSA" placeholder="0.8" step="0.1"></div></div>
+      <div class="g2"><div class="fl"><label>LH (mIU/mL)</label><input type="number" id="bwLH" placeholder="5" step="0.1"></div><div class="fl"><label>FSH (mIU/mL)</label><input type="number" id="bwFSH" placeholder="4" step="0.1"></div></div>
+      <div class="g2"><div class="fl"><label>SHBG (nmol/L)</label><input type="number" id="bwSHBG" placeholder="30"></div><div class="fl"><label>Prolactin (ng/mL)</label><input type="number" id="bwPRL" placeholder="8" step="0.1"></div></div>
+      <div class="g2"><div class="fl"><label>ALT (U/L)</label><input type="number" id="bwALT" placeholder="25"></div><div class="fl"><label>AST (U/L)</label><input type="number" id="bwAST" placeholder="22"></div></div>
+      <div class="g2"><div class="fl"><label>IGF-1 (ng/mL)</label><input type="number" id="bwIGF" placeholder="200"></div><div class="fl"><label>Total Cholesterol</label><input type="number" id="bwTC" placeholder="180"></div></div>
+      <div class="g2"><div class="fl"><label>HDL / LDL</label><input type="text" id="bwHDL" placeholder="55/110"></div><div class="fl"><label>Creatinine (mg/dL)</label><input type="number" id="bwCR" placeholder="1.0" step="0.01"></div></div>
+      <div class="fl"><label>Other (key:value, comma sep)</label><input type="text" id="bwOther" placeholder="RBC:5.1, WBC:6.2, Glucose:95"></div>
+      <button class="btn bp" onclick="saveBloodwork()">Save Bloodwork</button>
+    </div>
+  </div>
+  <div class="card mt16"><div class="cl">Bloodwork History</div><div id="bwHistory"><div class="empty"><div class="eico">&#129516;</div><div class="etxt">No labs yet</div></div></div></div>
+  <div class="card mt16"><div class="cl">Metrics History</div><div id="mHistory"><div class="empty"><div class="eico">&#128202;</div><div class="etxt">No metrics yet</div></div></div></div>
+</div>
+
+<!-- CHARTS -->
+<div id="pg-charts" class="page">
+  <div class="st">Charts</div>
+  <div class="ss">Visual Trend Analysis</div>
+  <div class="card">
+    <div class="cl">Body Metrics</div>
+    <div class="ctabs" id="mChartTabs">
+      <button class="ctab on" onclick="renderMChart('weight',this)">Weight</button>
+      <button class="ctab" onclick="renderMChart('bf',this)">Body Fat</button>
+      <button class="ctab" onclick="renderMChart('bp',this)">Blood Pressure</button>
+      <button class="ctab" onclick="renderMChart('hr',this)">Heart Rate</button>
+      <button class="ctab" onclick="renderMChart('waist',this)">Waist</button>
+      <button class="ctab" onclick="renderMChart('feeling',this)">Feeling</button>
+      <button class="ctab" onclick="renderMChart('energy',this)">Energy</button>
+    </div>
+    <div class="cwrap"><canvas id="metricChart"></canvas></div>
+  </div>
+  <div class="card mt16">
+    <div class="cl">Bloodwork</div>
+    <div class="ctabs" id="bwChartTabs">
+      <button class="ctab on" onclick="renderBWChart('TT',this)">Total T</button>
+      <button class="ctab" onclick="renderBWChart('E2',this)">Estradiol</button>
+      <button class="ctab" onclick="renderBWChart('HCT',this)">Hematocrit</button>
+      <button class="ctab" onclick="renderBWChart('IGF',this)">IGF-1</button>
+      <button class="ctab" onclick="renderBWChart('ALT',this)">ALT</button>
+      <button class="ctab" onclick="renderBWChart('AST',this)">AST</button>
+      <button class="ctab" onclick="renderBWChart('PSA',this)">PSA</button>
+      <button class="ctab" onclick="renderBWChart('SHBG',this)">SHBG</button>
+    </div>
+    <div class="cwrap"><canvas id="bwChart"></canvas></div>
+  </div>
+</div>
+
+<!-- AI ANALYSIS -->
+<div id="pg-ai" class="page">
+  <div class="st">AI Analysis</div>
+  <div class="ss">Protocol Intelligence</div>
+  <div class="akbox">
+    <label>Anthropic API Key</label>
+    <input type="password" id="apiKey1" placeholder="sk-ant-..." oninput="syncKey(1)">
+    <div class="aknote">Get yours at console.anthropic.com - required when running outside claude.ai</div>
+  </div>
+  <div class="card">
+    <div class="cl">Generate Analysis</div>
+    <p style="font-size:13px;color:var(--mt);line-height:1.7;margin-bottom:13px;">Analyzes your active cycle, check-ins, bloodwork, and metrics for personalized recommendations.</p>
+    <div class="fl"><label>Specific Question (optional)</label><textarea id="aiQ" placeholder="e.g. Should I adjust my AI dose? Is my hematocrit a concern?"></textarea></div>
+    <button class="btn bp bbl" onclick="runAI()">Run AI Analysis</button>
+    <div class="lbar" id="aiLdr"></div>
+    <div class="air" id="aiRes"><div class="aihdr"><div class="aidot"></div>CycleIQ AI</div><div class="aitxt" id="aiTxt"></div></div>
+  </div>
+  <div class="card mt16"><div class="cl">History</div><div id="aiHist"><div class="empty"><div class="eico">&#9889;</div><div class="etxt">No analyses yet</div></div></div></div>
+</div>
+
+<!-- CALCULATORS -->
+<div id="pg-calculator" class="page">
+  <div class="st">Calculators</div>
+  <div class="ss">Dosage and Reconstitution Tools</div>
+  <div class="g2">
+    <div class="card cg">
+      <div class="cl">Peptide Reconstitution</div>
+      <p style="font-size:12px;color:var(--mt);margin-bottom:14px;line-height:1.6;">Calculate how much bac water to add and how many units to draw per dose.</p>
+      <div class="fl"><label>Peptide</label>
+        <select id="rcPep">
+          <optgroup label="GH Peptides / Secretagogues">
+          <option>HGH (Somatropin)</option>
+          <option>CJC-1295 (with DAC)</option>
+          <option>CJC-1295 (no DAC / Mod GRF 1-29)</option>
+          <option>Ipamorelin</option>
+          <option>GHRP-2</option>
+          <option>GHRP-6</option>
+          <option>Hexarelin</option>
+          <option>Sermorelin</option>
+          <option>Tesamorelin</option>
+          <option>HGH Fragment 176-191</option>
+          </optgroup>
+          <optgroup label="Healing / Recovery Peptides">
+          <option>BPC-157</option>
+          <option>TB-500 (Thymosin Beta-4)</option>
+          <option>GHK-Cu</option>
+          <option>LL-37</option>
+          <option>Thymosin Alpha-1</option>
+          <option>KPV</option>
+          <option>Larazotide (AT-1001)</option>
+          </optgroup>
+          <optgroup label="IGF / Growth Factors">
+          <option>IGF-1 LR3</option>
+          <option>IGF-1 DES</option>
+          <option>MGF</option>
+          <option>PEG-MGF</option>
+          </optgroup>
+          <optgroup label="Weight / Metabolic">
+          <option>AOD-9604</option>
+          <option>GLP-1 / Semaglutide analog</option>
+          <option>Retatrutide (GLP-1/GIP/Glucagon)</option>
+          <option>Tirzepatide</option>
+          <option>MOTS-c</option>
+          <option>5-Amino-1MQ</option>
+          </optgroup>
+          <optgroup label="Tanning / Sexual">
+          <option>Melanotan I</option>
+          <option>Melanotan II</option>
+          <option>PT-141 (Bremelanotide)</option>
+          </optgroup>
+          <optgroup label="Cognitive / Nootropic">
+          <option>Selank</option>
+          <option>Semax</option>
+          <option>Dihexa</option>
+          <option>Epithalon</option>
+          <option>Kisspeptin-10</option>
+          <option>NAD+ (IV/SubQ)</option>
+          </optgroup>
+          <optgroup label="Other Reconstituted">
+          <option>HCG</option>
+          <option>HMG</option>
+          <option>Kisspeptin</option>
+          <option>Snap-8</option>
+          <option>Custom</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="g2">
+        <div class="fl"><label>Vial Amount (mg)</label><input type="number" id="rcVial" placeholder="5" step="0.1" oninput="calcRecon()"></div>
+        <div class="fl"><label>Bac Water to Add (mL)</label><input type="number" id="rcWater" placeholder="2" step="0.5" oninput="calcRecon()"></div>
+      </div>
+      <div class="g2">
+        <div class="fl"><label>Desired Dose (mcg)</label><input type="number" id="rcDose" placeholder="250" oninput="calcRecon()"></div>
+        <div class="fl"><label>Syringe</label>
+          <select id="rcSyr" onchange="calcRecon()">
+            <option value="100">U-100 insulin (100 IU)</option>
+            <option value="50">U-50 (50 IU)</option>
+          </select>
+        </div>
+      </div>
+      <div class="rres" id="rcRes">
+        <div class="cl" style="color:var(--gn);">Results</div>
+        <div class="rline"><span>Concentration after recon:</span><strong id="rcConc">--</strong></div>
+        <div class="rline"><span>Units to draw per dose:</span><strong id="rcUnits">--</strong></div>
+        <div class="rline"><span>mL to draw per dose:</span><strong id="rcMl">--</strong></div>
+        <div class="rline"><span>Doses per vial:</span><strong id="rcDoses">--</strong></div>
+        <div class="rline"><span>Days supply (1x/day):</span><strong id="rcDays">--</strong></div>
+      </div>
+    </div>
+    <div class="card ca">
+      <div class="cl">Injectable Dosage Helper</div>
+      <p style="font-size:12px;color:var(--mt);margin-bottom:14px;line-height:1.6;">Convert mg dose to mL and syringe units for oil or water-based injectables.</p>
+      <div class="fl"><label>Concentration (mg/mL)</label><input type="number" id="dhConc" placeholder="200" oninput="calcDose()"></div>
+      <div class="fl"><label>Desired Dose (mg)</label><input type="number" id="dhDose" placeholder="250" oninput="calcDose()"></div>
+      <div class="rres blue" id="dhRes">
+        <div class="cl" style="color:var(--ac);">Results</div>
+        <div class="rline"><span>Volume to draw:</span><strong id="dhMl">--</strong></div>
+        <div class="rline"><span>Insulin syringe (U-100):</span><strong id="dhU">--</strong></div>
+        <div class="rline"><span>Weekly total (2x/wk):</span><strong id="dhW2">--</strong></div>
+        <div class="rline"><span>Weekly total (3x/wk):</span><strong id="dhW3">--</strong></div>
+        <div class="rline"><span>Monthly (daily dosing):</span><strong id="dhM">--</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="card mt16">
+    <div class="akbox" style="margin-bottom:0;">
+      <label>API Key Required</label>
+      <input type="password" id="apiKey2" placeholder="sk-ant-..." oninput="syncKey(2)">
+    </div>
+    <div class="cl" style="margin-top:14px;">Ask About Dosing / Reconstitution</div>
+    <div class="fl"><textarea id="calcQ" placeholder="e.g. How do I reconstitute 5mg BPC-157 with 2mL bac water and dose 250mcg?" rows="3"></textarea></div>
+    <button class="btn bp" onclick="runCalcAI()">Ask AI</button>
+    <div class="lbar" id="calcLdr"></div>
+    <div class="air" id="calcRes"><div class="aihdr"><div class="aidot"></div>CycleIQ AI - Dosing Guide</div><div class="aitxt" id="calcTxt"></div></div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="pg-log" class="page">
+  <div class="st">Full Log</div>
+  <div class="ss">Chronological History</div>
+  <div id="fullLog"><div class="empty"><div class="eico">&#8856;</div><div class="etxt">Nothing yet</div></div></div>
+</div>
+
+</div><!-- /main -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =============================================
+// DATA
+// =============================================
+var COMPOUNDS = {
+  'Anabolics / Androgens': ['Testosterone Enanthate','Testosterone Cypionate','Testosterone Propionate','Testosterone Undecanoate','Testosterone Suspension','Testosterone Base','Nandrolone Decanoate (Deca)','Nandrolone Phenylpropionate (NPP)','Trenbolone Acetate','Trenbolone Enanthate','Trenbolone Hex (Parabolan)','Masteron Propionate','Masteron Enanthate','Boldenone Undecylenate (EQ)','Primobolan Depot','Primobolan Oral','MENT (Trestolone Acetate)','DHB (1-Test Cyp)','Methyltestosterone'],
+  'Orals': ['Anavar (Oxandrolone)','Winstrol Oral','Dianabol (Methandrostenolone)','Anadrol (Oxymetholone)','Turinabol','Superdrol (Methasterone)','Halotestin (Fluoxymesterone)','Proviron (Mesterolone)','Epistane','M1T (Methyl-1-Testosterone)'],
+  'Growth / GH Peptides': ['HGH (Somatropin - pharma)','Generic HGH','IGF-1 LR3','MGF','PEG-MGF','Insulin (Humalog/Novolog)','Insulin (Lantus/Levemir)'],
+  'Research Peptides': ['BPC-157','TB-500 (Thymosin Beta-4)','GHK-Cu','Epithalon','CJC-1295 (with DAC)','CJC-1295 (no DAC / Mod GRF 1-29)','Ipamorelin','GHRP-2','GHRP-6','Hexarelin','Sermorelin','Tesamorelin','AOD-9604','HGH Fragment 176-191','Melanotan I','Melanotan II','PT-141 (Bremelanotide)','Selank','Semax','Dihexa','Kisspeptin-10','LL-37','Thymosin Alpha-1','GLP-1 / Semaglutide analog','Retatrutide (GLP-1/GIP/Glucagon)'],
+  'SARMs': ['RAD-140 (Testolone)','LGD-4033 (Ligandrol)','MK-677 (Ibutamoren)','GW-501516 (Cardarine)','Ostarine (MK-2866)','YK-11','S23','S4 (Andarine)','RAD-150 (TLB-150)','LGD-3303','AC-262','ACP-105'],
+  'Ancillaries and PCT': ['Anastrozole (Arimidex)','Exemestane (Aromasin)','Letrozole (Femara)','Cabergoline (Dostinex)','Pramipexole','Raloxifene','Tamoxifen (Nolvadex)','Clomiphene (Clomid)','Enclomiphene','HCG','HMG','TUDCA','NAC','Telmisartan','Metformin','Berberine','Clenbuterol','T3 (Cytomel)','T4 (Levothyroxine)'],
+  'Other': ['Custom / Unlisted']
+};
+
+var SYMPTOMS = ['Acne (face/back)','Water Retention','Bloating','High Blood Pressure','Elevated Heart Rate','Joint Pain / Aching','Lower Back Pain','Night Sweats','Hot Flashes','Gyno / Nipple Sensitivity','Hair Thinning / Shedding','Oily Skin','Mood Swings','Irritability / Rage','Anxiety','Depression / Low Mood','Brain Fog','Lethargy / Fatigue','Headaches','Nausea','Insomnia','Vivid Dreams','Shortness of Breath','Shin Splints (GH)','Carpal Tunnel (GH)','Numbness / Tingling','Decreased Appetite','Increased Appetite','Dry Mouth','Flushing','Dizziness','Injection Site Pain','Injection Site PIP','Injection Site Redness','Visual Disturbances','Chest Tightness'];
+
+var FREQ_DAYS = {'ED':1,'EOD':2,'E3D':3,'2x/wk':3.5,'3x/wk':2.33,'1x/wk':7,'2x/day':0.5,'3x/day':0.33,'5x/wk':1.4,'PRN':null};
+
+// =============================================
+// STATE
+// =============================================
+function defData() { return {cycles:[],checkins:[],metrics:[],bloodwork:[],aiHistory:[],log:[],apiKey:''}; }
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('ciq') || 'null') || defData(); }
+  catch(e) { return defData(); }
+}
+
+function saveState() {
+  try { localStorage.setItem('ciq', JSON.stringify(S)); } catch(e) {}
+}
+
+var S = loadState();
+var apiKey = S.apiKey || '';
+
+// =============================================
+// UTILS
+// =============================================
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function gv(id) {
+  var el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+function sv(id, v) {
+  var el = document.getElementById(id);
+  if (el) el.value = v;
+}
+
+function toast(msg, col) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = col || 'var(--ac)';
+  t.style.display = 'block';
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.style.display = 'none'; }, 2800);
+}
+
+function addLog(type, text) {
+  S.log.push({type: type, text: text, date: today(), ts: Date.now()});
+}
+
+function logColor(type) {
+  var m = {checkin:'var(--gn)', bloodwork:'var(--rd)', metric:'var(--ac)', ai:'var(--yw)', dose:'var(--pu)', cycle:'var(--ac)'};
+  return m[type] || 'var(--mt)';
+}
+
+function syncKey(n) {
+  apiKey = gv('apiKey' + n);
+  S.apiKey = apiKey;
+  saveState();
+  sv('apiKey' + (n === 1 ? 2 : 1), apiKey);
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+function showPage(id) {
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) pages[i].classList.remove('on');
+  var btns = document.querySelectorAll('.nb');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('on');
+
+  var pg = document.getElementById('pg-' + id);
+  if (pg) pg.classList.add('on');
+
+  var pageList = ['dashboard','schedule','cycles','checkin','metrics','charts','ai','calculator','log'];
+  var idx = pageList.indexOf(id);
+  if (btns[idx]) btns[idx].classList.add('on');
+
+  if (id === 'dashboard') renderDash();
+  if (id === 'schedule') renderSchedule();
+  if (id === 'cycles') renderCycleList();
+  if (id === 'checkin') initCI();
+  if (id === 'metrics') renderMetrics();
+  if (id === 'charts') {
+    renderMChart('weight', document.querySelector('#mChartTabs .ctab'));
+    renderBWChart('TT', document.querySelector('#bwChartTabs .ctab'));
+  }
+  if (id === 'ai') renderAIHist();
+  if (id === 'log') renderLog();
+}
+
+// =============================================
+// COMPOUND SELECT BUILDER
+// =============================================
+function buildSelect() {
+  var html = '<option value="">Select compound...</option>';
+  for (var cat in COMPOUNDS) {
+    html += '<optgroup label="' + cat + '">';
+    var items = COMPOUNDS[cat];
+    for (var i = 0; i < items.length; i++) {
+      html += '<option>' + items[i] + '</option>';
+    }
+    html += '</optgroup>';
+  }
+  return html;
+}
+
+function addCompRow() {
+  var id = 'cr' + Date.now();
+  var div = document.createElement('div');
+  div.className = 'crow';
+  div.id = id;
+
+  var html = '';
+  html += '<div class="fl" style="margin:0"><label>Compound</label><select>' + buildSelect() + '</select></div>';
+  html += '<div class="fl" style="margin:0"><label>Dose</label><input type="number" placeholder="250"></div>';
+  html += '<div class="fl" style="margin:0"><label>Unit</label><select><option>mg</option><option>mcg</option><option>IU</option><option>mL</option></select></div>';
+  html += '<div class="fl" style="margin:0"><label>Frequency</label><select><option>ED</option><option>EOD</option><option>E3D</option><option>2x/wk</option><option>3x/wk</option><option>1x/wk</option><option>2x/day</option><option>3x/day</option><option>5x/wk</option><option>PRN</option></select></div>';
+  html += '<div class="fl" style="margin:0"><label>Route</label><select><option>IM</option><option>SubQ</option><option>Oral</option><option>Topical</option><option>Nasal</option><option>Sublingual</option></select></div>';
+  html += '<button class="rb" onclick="document.getElementById(\'' + id + '\').remove()">&#215;</button>';
+
+  div.innerHTML = html;
+  document.getElementById('compoundsList').appendChild(div);
+}
+
+function getCompounds() {
+  var rows = document.querySelectorAll('.crow');
+  var out = [];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var sels = r.querySelectorAll('select');
+    var inp = r.querySelector('input[type=number]');
+    if (sels[0] && sels[0].value) {
+      out.push({
+        name: sels[0].value,
+        dose: inp ? inp.value : '',
+        unit: sels[1] ? sels[1].value : 'mg',
+        frequency: sels[2] ? sels[2].value : 'ED',
+        route: sels[3] ? sels[3].value : 'IM'
+      });
+    }
+  }
+  return out;
+}
+
+// =============================================
+// CYCLES
+// =============================================
+function saveCycle() {
+  var name = gv('cycleName').trim();
+  if (!name) { toast('Enter a cycle name', 'var(--rd)'); return; }
+  var compounds = getCompounds();
+  if (!compounds.length) { toast('Add at least one compound', 'var(--rd)'); return; }
+
+  for (var i = 0; i < S.cycles.length; i++) S.cycles[i].active = false;
+
+  var cycle = {
+    id: Date.now(),
+    name: name,
+    type: gv('cycleType'),
+    start: gv('cycleStart'),
+    duration: parseInt(gv('cycleDuration')) || 12,
+    compounds: compounds,
+    notes: gv('cycleNotes'),
+    active: true,
+    lastDoses: {}
+  };
+
+  S.cycles.push(cycle);
+  var cnames = [];
+  for (var i = 0; i < compounds.length; i++) cnames.push(compounds[i].name);
+  addLog('cycle', 'Started cycle: ' + name + ' (' + cnames.join(', ') + ')');
+  saveState();
+  toast('Cycle saved and activated', 'var(--gn)');
+  sv('cycleName', ''); sv('cycleNotes', '');
+  document.getElementById('compoundsList').innerHTML = '';
+  addCompRow();
+  renderDoseBanner();
+}
+
+function renderCycleList() {
+  var el = document.getElementById('cycleList');
+  if (!S.cycles.length) {
+    el.innerHTML = '<div class="empty"><div class="eico">&#8856;</div><div class="etxt">No cycles yet</div></div>';
+    return;
+  }
+  var html = '';
+  var rev = S.cycles.slice().reverse();
+  for (var i = 0; i < rev.length; i++) {
+    var c = rev[i];
+    var start = new Date(c.start);
+    var end = new Date(start);
+    end.setDate(end.getDate() + c.duration * 7);
+    var days = Math.floor((new Date() - start) / 86400000);
+    var pct = Math.min(100, Math.max(0, Math.round(days / (c.duration * 7) * 100)));
+    var chips = '';
+    for (var j = 0; j < c.compounds.length; j++) {
+      var cp = c.compounds[j];
+      chips += '<div class="chip">' + cp.name + '<em>' + cp.dose + cp.unit + ' ' + cp.frequency + '</em></div>';
+    }
+    html += '<div class="cyc">';
+    html += '<div class="cych">';
+    html += '<div><div style="font-size:17px;font-weight:700;">' + c.name + '</div>';
+    html += '<div style="font-family:var(--fm);font-size:10px;color:var(--mt);margin-top:3px;">' + c.type + ' - ' + c.start + ' to ' + end.toISOString().split('T')[0] + '</div></div>';
+    html += '<div style="display:flex;gap:7px;align-items:center;">';
+    html += '<span class="badge ' + (c.active ? 'bact' : 'bend') + '">' + (c.active ? 'Active' : 'Ended') + '</span>';
+    if (!c.active) html += '<button class="btn bgh bsm" onclick="activateCycle(' + c.id + ')">Set Active</button>';
+    html += '<button class="rb" onclick="deleteCycle(' + c.id + ')">&#215;</button>';
+    html += '</div></div>';
+    if (c.active) {
+      html += '<div class="pw"><div class="pl"><span>Week ' + (Math.floor(days / 7) + 1) + ' / ' + c.duration + '</span><span>' + pct + '%</span></div>';
+      html += '<div class="pb"><div class="pf" style="width:' + pct + '%"></div></div></div>';
+    }
+    html += '<div class="chips">' + chips + '</div>';
+    if (c.notes) html += '<div style="font-size:12px;color:var(--mt);margin-top:9px;">' + c.notes + '</div>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function activateCycle(id) {
+  for (var i = 0; i < S.cycles.length; i++) S.cycles[i].active = (S.cycles[i].id === id);
+  saveState(); renderCycleList(); renderDoseBanner();
+  toast('Cycle activated', 'var(--gn)');
+}
+
+function deleteCycle(id) {
+  if (!confirm('Delete this cycle?')) return;
+  var newCycles = [];
+  for (var i = 0; i < S.cycles.length; i++) if (S.cycles[i].id !== id) newCycles.push(S.cycles[i]);
+  S.cycles = newCycles;
+  saveState(); renderCycleList(); renderDoseBanner();
+  toast('Deleted');
+}
+
+// =============================================
+// DOSE SCHEDULE
+// =============================================
+function getDoseInfo(cycle) {
+  var start = new Date(cycle.start);
+  var daysSince = Math.floor((new Date() - start) / 86400000);
+  var out = [];
+  for (var i = 0; i < cycle.compounds.length; i++) {
+    var comp = cycle.compounds[i];
+    var iv = FREQ_DAYS[comp.frequency];
+    if (iv === null || iv === undefined) {
+      out.push({name:comp.name,dose:comp.dose,unit:comp.unit,frequency:comp.frequency,route:comp.route,status:'prn',daysUntil:null});
+      continue;
+    }
+    var lastDay = (cycle.lastDoses && cycle.lastDoses[comp.name] != null) ? cycle.lastDoses[comp.name] : null;
+    var daysUntil = (lastDay === null) ? 0 : Math.max(0, iv - (daysSince - lastDay));
+    daysUntil = Math.round(daysUntil * 10) / 10;
+    var status = daysUntil <= 0 ? 'due-now' : daysUntil <= 1 ? 'due-today' : 'upcoming';
+    out.push({name:comp.name,dose:comp.dose,unit:comp.unit,frequency:comp.frequency,route:comp.route,status:status,daysUntil:daysUntil});
+  }
+  return out;
+}
+
+function renderSchedule() {
+  var el = document.getElementById('scheduleContent');
+  var active = null;
+  for (var i = 0; i < S.cycles.length; i++) if (S.cycles[i].active) { active = S.cycles[i]; break; }
+  if (!active) {
+    el.innerHTML = '<div class="empty"><div class="eico">&#128138;</div><div class="etxt">No active cycle - start one in My Cycles</div></div>';
+    return;
+  }
+  var doses = getDoseInfo(active);
+  var due = [], soon = [], upcoming = [];
+  for (var i = 0; i < doses.length; i++) {
+    var d = doses[i];
+    if (d.status === 'due-now' || d.status === 'prn') due.push(d);
+    else if (d.status === 'due-today') soon.push(d);
+    else upcoming.push(d);
+  }
+  var html = '<div style="font-family:var(--fm);font-size:11px;color:var(--mt);margin-bottom:18px;">Cycle: <strong style="color:var(--tx)">' + active.name + '</strong></div>';
+  if (due.length) { html += '<div class="cl" style="color:var(--gn);">Due Now</div>'; for (var i = 0; i < due.length; i++) html += doseCard(due[i]); }
+  if (soon.length) { html += '<div class="cl" style="color:var(--yw);margin-top:14px;">Due Tomorrow</div>'; for (var i = 0; i < soon.length; i++) html += doseCard(soon[i]); }
+  if (upcoming.length) { html += '<div class="cl" style="margin-top:14px;">Upcoming</div>'; for (var i = 0; i < upcoming.length; i++) html += doseCard(upcoming[i]); }
+  el.innerHTML = html;
+}
+
+function doseCard(d) {
+  var cls = d.status === 'due-now' ? 'dn' : d.status === 'due-today' ? 'ds' : '';
+  var timeText = d.status === 'due-now' ? 'NOW' : d.status === 'due-today' ? 'Tomorrow' : d.daysUntil != null ? 'In ' + d.daysUntil + 'd' : 'PRN';
+  var timeCls = d.status === 'due-now' ? 'g' : d.status === 'due-today' ? 'y' : '';
+  var btn = d.status === 'due-now' ? '<button class="btn bg2 bsm" onclick="markDosed(\'' + d.name + '\')">Mark Taken</button>' : '';
+  return '<div class="dc ' + cls + '"><div><div class="dname">' + d.name + '</div><div class="dmeta">' + d.dose + d.unit + ' - ' + d.frequency + ' - ' + d.route + '</div></div>'
+    + '<div style="display:flex;align-items:center;gap:10px;"><div class="dtime ' + timeCls + '">' + timeText + '</div>' + btn + '</div></div>';
+}
+
+function markDosed(compName) {
+  var active = null;
+  for (var i = 0; i < S.cycles.length; i++) if (S.cycles[i].active) { active = S.cycles[i]; break; }
+  if (!active) return;
+  if (!active.lastDoses) active.lastDoses = {};
+  var daysSince = Math.floor((new Date() - new Date(active.start)) / 86400000);
+  active.lastDoses[compName] = daysSince;
+  addLog('dose', 'Dose logged: ' + compName);
+  saveState(); renderSchedule(); renderDoseBanner();
+  toast(compName + ' marked taken', 'var(--gn)');
+}
+
+function renderDoseBanner() {
+  var banner = document.getElementById('doseBanner');
+  var pills = document.getElementById('dosePills');
+  var active = null;
+  for (var i = 0; i < S.cycles.length; i++) if (S.cycles[i].active) { active = S.cycles[i]; break; }
+  if (!active) { banner.style.display = 'none'; return; }
+  var doses = getDoseInfo(active);
+  var due = [];
+  for (var i = 0; i < doses.length; i++) {
+    if (doses[i].status === 'due-now' || doses[i].status === 'due-today') due.push(doses[i]);
+  }
+  if (!due.length) { banner.style.display = 'none'; return; }
+  banner.style.display = 'block';
+  var html = '';
+  for (var i = 0; i < due.length; i++) {
+    var d = due[i];
+    html += '<div class="dpill ' + (d.status === 'due-now' ? 'dn' : 'dt') + '">' + d.name + ' ' + d.dose + d.unit + ' - ' + (d.status === 'due-now' ? 'NOW' : 'Tomorrow') + '</div>';
+  }
+  pills.innerHTML = html;
+}
+
+// =============================================
+// CHECK-IN
+// =============================================
+var selFeeling = null;
+
+function buildFeelingScale() {
+  var el = document.getElementById('feelScale');
+  if (!el) return;
+  var html = '';
+  for (var i = 1; i <= 10; i++) {
+    var lbl = i === 1 ? 'Awful' : i === 5 ? 'Okay' : i === 10 ? 'Peak' : '';
+    html += '<button class="fbtn" data-v="' + i + '" onclick="selFeel(' + i + ')">' + i;
+    if (lbl) html += '<br><span style="font-size:9px">' + lbl + '</span>';
+    html += '</button>';
+  }
+  el.innerHTML = html;
+}
+
+function selFeel(v) {
+  selFeeling = v;
+  var btns = document.querySelectorAll('.fbtn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.remove('sbad', 'sok', 'sgd');
+    if (parseInt(btns[i].dataset.v) === v) {
+      btns[i].classList.add(v <= 3 ? 'sbad' : v <= 6 ? 'sok' : 'sgd');
+    }
+  }
+}
+
+function buildSymptomGrid() {
+  var el = document.getElementById('symptomGrid');
+  if (!el) return;
+  var html = '';
+  for (var i = 0; i < SYMPTOMS.length; i++) {
+    html += '<div class="si" onclick="this.classList.toggle(\'chk\')">' + SYMPTOMS[i] + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function initCI() {
+  var todayStr = today();
+  var already = false;
+  for (var i = 0; i < S.checkins.length; i++) if (S.checkins[i].date === todayStr) { already = true; break; }
+  document.getElementById('alreadyIn').style.display = already ? 'block' : 'none';
+  document.getElementById('ciForm').style.display = already ? 'none' : 'block';
+  selFeeling = null;
+  var fbtns = document.querySelectorAll('.fbtn');
+  for (var i = 0; i < fbtns.length; i++) fbtns[i].classList.remove('sbad', 'sok', 'sgd');
+  var sis = document.querySelectorAll('.si');
+  for (var i = 0; i < sis.length; i++) sis[i].classList.remove('chk');
+  var sliders = ['ciEnergy','ciMood','ciLibido','ciSleep','ciPerf','ciDrive','ciAppetite','ciPump'];
+  for (var i = 0; i < sliders.length; i++) {
+    var sl = document.getElementById(sliders[i]);
+    if (sl) { sl.value = 5; var vEl = document.getElementById(sliders[i] + 'V'); if (vEl) vEl.textContent = '5/10'; }
+  }
+  document.getElementById('ciDate').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'}).toUpperCase();
+}
+
+function forceCI() {
+  document.getElementById('alreadyIn').style.display = 'none';
+  document.getElementById('ciForm').style.display = 'block';
+}
+
+function submitCI() {
+  if (!selFeeling) { toast('Select a feeling score', 'var(--rd)'); return; }
+  var syms = [];
+  var sis = document.querySelectorAll('.si.chk');
+  for (var i = 0; i < sis.length; i++) syms.push(sis[i].textContent);
+
+  var entry = {
+    date: today(), feeling: selFeeling,
+    energy: parseInt(gv('ciEnergy')), mood: parseInt(gv('ciMood')),
+    libido: parseInt(gv('ciLibido')), sleep: parseInt(gv('ciSleep')),
+    perf: parseInt(gv('ciPerf')), drive: parseInt(gv('ciDrive')),
+    appetite: parseInt(gv('ciAppetite')), pump: parseInt(gv('ciPump')),
+    symptoms: syms,
+    weight: gv('ciWeight'), bp: gv('ciBP'), hr: gv('ciHR'),
+    waist: gv('ciWaist'), temp: gv('ciTemp'), glucose: gv('ciGlucose'),
+    site: gv('ciSite'), siteRx: gv('ciSiteRx'), notes: gv('ciNotes')
+  };
+
+  S.checkins.push(entry);
+  if (entry.weight || entry.bp) S.metrics.push({date:entry.date,weight:entry.weight,bp:entry.bp,hr:entry.hr,waist:entry.waist});
+
+  var symStr = syms.length ? ', Symptoms: ' + syms.slice(0, 3).join(', ') + (syms.length > 3 ? '...' : '') : '';
+  addLog('checkin', 'Check-in: Feeling ' + entry.feeling + '/10, Energy ' + entry.energy + '/10' + symStr);
+  saveState();
+  toast('Check-in saved!', 'var(--gn)');
+  document.getElementById('alreadyIn').style.display = 'block';
+  document.getElementById('ciForm').style.display = 'none';
+}
+
+// =============================================
+// METRICS & BLOODWORK
+// =============================================
+function saveMetric() {
+  var entry = {id:Date.now(),date:gv('mDate'),weight:gv('mWeight'),bf:gv('mBf'),bp:gv('mBP'),hr:gv('mHR'),waist:gv('mWaist'),chest:gv('mChest'),arms:gv('mArms')};
+  S.metrics.push(entry);
+  addLog('metric', 'Metrics: Weight ' + entry.weight + 'lbs, BP ' + entry.bp + (entry.bf ? ' BF ' + entry.bf + '%' : ''));
+  saveState(); toast('Metrics saved', 'var(--gn)'); renderMetrics();
+}
+
+function saveBloodwork() {
+  var bw = {id:Date.now(),date:gv('bwDate'),TT:gv('bwTT'),FT:gv('bwFT'),E2:gv('bwE2'),HCT:gv('bwHCT'),HGB:gv('bwHGB'),PSA:gv('bwPSA'),LH:gv('bwLH'),FSH:gv('bwFSH'),SHBG:gv('bwSHBG'),PRL:gv('bwPRL'),ALT:gv('bwALT'),AST:gv('bwAST'),IGF:gv('bwIGF'),TC:gv('bwTC'),HDL:gv('bwHDL'),CR:gv('bwCR'),other:gv('bwOther')};
+  S.bloodwork.push(bw);
+  addLog('bloodwork', 'Bloodwork: TT=' + (bw.TT||'?') + ' ng/dL, E2=' + (bw.E2||'?') + ' pg/mL, HCT=' + (bw.HCT||'?') + '%');
+  saveState(); toast('Bloodwork saved', 'var(--gn)'); renderMetrics();
+}
+
+function fTT(v) { if (!v) return ''; v = parseFloat(v); return v > 1500 ? 'vhi' : v < 250 ? 'vlo' : 'vok'; }
+function fE2(v) { if (!v) return ''; v = parseFloat(v); return v > 60 ? 'vhi' : v < 10 ? 'vlo' : 'vok'; }
+function fHCT(v) { if (!v) return ''; v = parseFloat(v); return v > 54 ? 'vhi' : v < 36 ? 'vlo' : 'vok'; }
+function fPSA(v) { if (!v) return ''; return parseFloat(v) > 4 ? 'vhi' : 'vok'; }
+function fPRL(v) { if (!v) return ''; return parseFloat(v) > 25 ? 'vhi' : 'vok'; }
+function fLiver(v) { if (!v) return ''; v = parseFloat(v); return v > 80 ? 'vhi' : v > 50 ? 'vlo' : 'vok'; }
+function fBP(v) { if (!v) return ''; var s = parseInt(v); return s > 140 ? 'vhi' : s < 90 ? 'vlo' : 'vok'; }
+
+function renderMetrics() {
+  var bwEl = document.getElementById('bwHistory');
+  var mEl = document.getElementById('mHistory');
+
+  if (!S.bloodwork.length) {
+    bwEl.innerHTML = '<div class="empty"><div class="eico">&#129516;</div><div class="etxt">No labs yet</div></div>';
+  } else {
+    var rows = '';
+    var rev = S.bloodwork.slice().reverse();
+    for (var i = 0; i < rev.length; i++) {
+      var b = rev[i];
+      rows += '<tr>'
+        + '<td>' + b.date + '</td>'
+        + '<td class="' + fTT(b.TT) + '">' + (b.TT||'--') + '</td>'
+        + '<td class="' + fE2(b.E2) + '">' + (b.E2||'--') + '</td>'
+        + '<td class="' + fHCT(b.HCT) + '">' + (b.HCT||'--') + '</td>'
+        + '<td>' + (b.HGB||'--') + '</td>'
+        + '<td class="' + fPSA(b.PSA) + '">' + (b.PSA||'--') + '</td>'
+        + '<td>' + (b.LH||'--') + '</td>'
+        + '<td>' + (b.SHBG||'--') + '</td>'
+        + '<td class="' + fPRL(b.PRL) + '">' + (b.PRL||'--') + '</td>'
+        + '<td class="' + fLiver(b.ALT) + '">' + (b.ALT||'--') + '</td>'
+        + '<td class="' + fLiver(b.AST) + '">' + (b.AST||'--') + '</td>'
+        + '<td>' + (b.IGF||'--') + '</td>'
+        + '<td style="font-size:10px;color:var(--mt)">' + (b.other||'--') + '</td>'
+        + '</tr>';
+    }
+    bwEl.innerHTML = '<div style="overflow-x:auto"><table class="bwt"><thead><tr><th>Date</th><th>TT</th><th>E2</th><th>HCT%</th><th>HGB</th><th>PSA</th><th>LH</th><th>SHBG</th><th>PRL</th><th>ALT</th><th>AST</th><th>IGF-1</th><th>Other</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+
+  if (!S.metrics.length) {
+    mEl.innerHTML = '<div class="empty"><div class="eico">&#128202;</div><div class="etxt">No metrics yet</div></div>';
+  } else {
+    var mrows = '';
+    var mrev = S.metrics.slice().reverse();
+    for (var i = 0; i < mrev.length; i++) {
+      var m = mrev[i];
+      mrows += '<tr>'
+        + '<td>' + m.date + '</td>'
+        + '<td>' + (m.weight ? m.weight + ' lbs' : '--') + '</td>'
+        + '<td>' + (m.bf ? m.bf + '%' : '--') + '</td>'
+        + '<td class="' + fBP(m.bp) + '">' + (m.bp||'--') + '</td>'
+        + '<td>' + (m.hr ? m.hr + ' bpm' : '--') + '</td>'
+        + '<td>' + (m.waist ? m.waist + '"' : '--') + '</td>'
+        + '<td>' + (m.chest ? m.chest + '"' : '--') + '</td>'
+        + '<td>' + (m.arms ? m.arms + '"' : '--') + '</td>'
+        + '</tr>';
+    }
+    mEl.innerHTML = '<div style="overflow-x:auto"><table class="bwt"><thead><tr><th>Date</th><th>Weight</th><th>BF%</th><th>BP</th><th>HR</th><th>Waist</th><th>Chest</th><th>Arms</th></tr></thead><tbody>' + mrows + '</tbody></table></div>';
+  }
+}
+
+// =============================================
+// CHARTS
+// =============================================
+var mChartInst = null;
+var bwChartInst = null;
+
+var CHART_COLORS = {
+  weight:'#00d4ff', bf:'#ff4466', bp:'#ff4466', hr:'#ffcc00',
+  waist:'#bb88ff', feeling:'#00ff88', energy:'#00d4ff',
+  TT:'#00d4ff', E2:'#ff4466', HCT:'#ffcc00', IGF:'#00ff88',
+  ALT:'#ff4466', AST:'#ff8866', PSA:'#bb88ff', SHBG:'#00ff88'
+};
+
+function makeChartOpts() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {display: false},
+      tooltip: {
+        backgroundColor: 'rgba(13,17,23,0.95)',
+        borderColor: 'rgba(0,212,255,0.3)',
+        borderWidth: 1,
+        titleFont: {family: 'JetBrains Mono', size: 11},
+        bodyFont: {family: 'JetBrains Mono', size: 11}
+      }
+    },
+    scales: {
+      x: {ticks: {color: '#4a6a7a', font: {family: 'JetBrains Mono', size: 10}}, grid: {color: 'rgba(30,45,61,0.6)'}},
+      y: {ticks: {color: '#4a6a7a', font: {family: 'JetBrains Mono', size: 10}}, grid: {color: 'rgba(30,45,61,0.6)'}}
+    }
+  };
+}
+
+function renderMChart(key, btn) {
+  if (btn) {
+    var tabs = document.querySelectorAll('#mChartTabs .ctab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('on');
+    btn.classList.add('on');
+  }
+  var labels = [], values = [];
+  if (key === 'feeling') {
+    for (var i = 0; i < S.checkins.length; i++) {
+      if (S.checkins[i].feeling) { labels.push(S.checkins[i].date); values.push(S.checkins[i].feeling); }
+    }
+  } else if (key === 'energy') {
+    for (var i = 0; i < S.checkins.length; i++) {
+      if (S.checkins[i].energy) { labels.push(S.checkins[i].date); values.push(S.checkins[i].energy); }
+    }
+  } else {
+    for (var i = 0; i < S.metrics.length; i++) {
+      var m = S.metrics[i];
+      if (m[key]) {
+        var y = key === 'bp' ? parseInt(m.bp) : parseFloat(m[key]);
+        if (!isNaN(y)) { labels.push(m.date); values.push(y); }
+      }
+    }
+  }
+  var col = CHART_COLORS[key] || '#00d4ff';
+  if (mChartInst) mChartInst.destroy();
+  var ctx = document.getElementById('metricChart').getContext('2d');
+  mChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values, borderColor: col,
+        backgroundColor: col + '22',
+        fill: true, tension: 0.35,
+        pointBackgroundColor: col, pointRadius: 4, pointHoverRadius: 6
+      }]
+    },
+    options: makeChartOpts()
+  });
+}
+
+function renderBWChart(key, btn) {
+  if (btn) {
+    var tabs = document.querySelectorAll('#bwChartTabs .ctab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('on');
+    btn.classList.add('on');
+  }
+  var labels = [], values = [];
+  for (var i = 0; i < S.bloodwork.length; i++) {
+    var b = S.bloodwork[i];
+    if (b[key]) {
+      var y = parseFloat(b[key]);
+      if (!isNaN(y)) { labels.push(b.date); values.push(y); }
+    }
+  }
+  var col = CHART_COLORS[key] || '#00d4ff';
+  if (bwChartInst) bwChartInst.destroy();
+  var ctx = document.getElementById('bwChart').getContext('2d');
+  bwChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values, borderColor: col,
+        backgroundColor: col + '22',
+        fill: true, tension: 0.35,
+        pointBackgroundColor: col, pointRadius: 5, pointHoverRadius: 7
+      }]
+    },
+    options: makeChartOpts()
+  });
+}
+
+// =============================================
+// DASHBOARD
+// =============================================
+function renderDash() {
+  var mets = S.metrics.slice().reverse();
+  var lastW = null, prevW = null;
+  for (var i = 0; i < mets.length; i++) {
+    if (mets[i].weight) { if (!lastW) lastW = mets[i]; else if (!prevW) { prevW = mets[i]; break; } }
+  }
+  document.getElementById('d-wt').textContent = lastW ? lastW.weight : '--';
+  var dEl = document.getElementById('d-wtd');
+  if (lastW && prevW) {
+    var d = (parseFloat(lastW.weight) - parseFloat(prevW.weight)).toFixed(1);
+    dEl.innerHTML = '<span class="' + (d >= 0 ? 'dup' : 'ddn') + '">' + (d >= 0 ? '+' : '') + d + ' lbs</span>';
+  }
+  var lastBF = null;
+  for (var i = 0; i < mets.length; i++) if (mets[i].bf) { lastBF = mets[i]; break; }
+  document.getElementById('d-bf').textContent = lastBF ? lastBF.bf : '--';
+  var lastBP = null;
+  for (var i = 0; i < mets.length; i++) if (mets[i].bp) { lastBP = mets[i]; break; }
+  document.getElementById('d-bp').textContent = lastBP ? (parseInt(lastBP.bp) || '--') : '--';
+  var lastCI = S.checkins.length ? S.checkins[S.checkins.length - 1] : null;
+  document.getElementById('d-feel').textContent = lastCI ? lastCI.feeling : '--';
+
+  var active = null;
+  for (var i = 0; i < S.cycles.length; i++) if (S.cycles[i].active) { active = S.cycles[i]; break; }
+  var dc = document.getElementById('dashCycle');
+  if (active) {
+    var days = Math.floor((new Date() - new Date(active.start)) / 86400000);
+    var pct = Math.min(100, Math.round(days / (active.duration * 7) * 100));
+    var chips = '';
+    for (var i = 0; i < active.compounds.length; i++) {
+      var cp = active.compounds[i];
+      chips += '<div class="chip">' + cp.name + '<em>' + cp.dose + cp.unit + ' ' + cp.frequency + '</em></div>';
+    }
+    dc.innerHTML = '<div style="font-size:18px;font-weight:700;">' + active.name + '</div>'
+      + '<div style="font-family:var(--fm);font-size:10px;color:var(--mt);margin:3px 0 11px;">' + active.type + ' - Day ' + (days + 1) + '</div>'
+      + '<div class="pw"><div class="pl"><span>Week ' + (Math.floor(days / 7) + 1) + ' / ' + active.duration + '</span><span>' + pct + '%</span></div>'
+      + '<div class="pb"><div class="pf" style="width:' + pct + '%"></div></div></div>'
+      + '<div class="chips" style="margin-top:10px;">' + chips + '</div>';
+  } else {
+    dc.innerHTML = '<div class="empty"><div class="eico">&#8856;</div><div class="etxt">No active cycle</div></div>';
+  }
+
+  var dd = document.getElementById('dashDoses');
+  if (active) {
+    var doses = getDoseInfo(active);
+    var dueDoses = [];
+    for (var i = 0; i < doses.length; i++) {
+      if (doses[i].status === 'due-now' || doses[i].status === 'due-today') dueDoses.push(doses[i]);
+      if (dueDoses.length >= 4) break;
+    }
+    if (dueDoses.length) {
+      var html = '';
+      for (var i = 0; i < dueDoses.length; i++) {
+        var d = dueDoses[i];
+        html += '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd2);font-size:13px;">'
+          + '<span>' + d.name + ' <span style="color:var(--mt);font-family:var(--fm);font-size:10px;">' + d.dose + d.unit + '</span></span>'
+          + '<span style="font-family:var(--fm);font-size:11px;color:' + (d.status === 'due-now' ? 'var(--gn)' : 'var(--yw)') + ';">' + (d.status === 'due-now' ? 'NOW' : 'Tomorrow') + '</span>'
+          + '</div>';
+      }
+      dd.innerHTML = html;
+    } else {
+      dd.innerHTML = '<div style="color:var(--mt);font-size:13px;padding:7px 0;">No doses due right now</div>';
+    }
+  } else {
+    dd.innerHTML = '<div class="empty"><div class="etxt">No active cycle</div></div>';
+  }
+
+  var dl = document.getElementById('dashLog');
+  if (!S.log.length) {
+    dl.innerHTML = '<div class="empty"><div class="etxt">Nothing yet</div></div>';
+  } else {
+    var logItems = S.log.slice(-5).reverse();
+    var lhtml = '';
+    for (var i = 0; i < logItems.length; i++) {
+      var l = logItems[i];
+      lhtml += '<div class="le"><div class="ldot" style="background:' + logColor(l.type) + '"></div>'
+        + '<div><div class="ldate">' + l.date + '</div><div class="ltxt">' + l.text + '</div></div></div>';
+    }
+    dl.innerHTML = lhtml;
+  }
+}
+
+// =============================================
+// LOG
+// =============================================
+function renderLog() {
+  var el = document.getElementById('fullLog');
+  if (!S.log.length) {
+    el.innerHTML = '<div class="empty"><div class="eico">&#8856;</div><div class="etxt">Nothing yet</div></div>';
+    return;
+  }
+  var rev = S.log.slice().reverse();
+  var html = '';
+  for (var i = 0; i < rev.length; i++) {
+    var l = rev[i];
+    html += '<div class="le"><div class="ldot" style="background:' + logColor(l.type) + ';box-shadow:0 0 5px ' + logColor(l.type) + '"></div>'
+      + '<div><div class="ldate">' + l.date + ' <span style="font-size:9px;letter-spacing:2px;opacity:.6;">' + l.type + '</span></div>'
+      + '<div class="ltxt">' + l.text + '</div></div></div>';
+  }
+  el.innerHTML = html;
+}
+
+// =============================================
+// AI
+// =============================================
+async function callAI(messages, sysprompt, ldrId, resId, txtId) {
+  var key = apiKey || gv('apiKey1') || gv('apiKey2');
+  if (!key) { toast('Enter your Anthropic API key first', 'var(--yw)'); return null; }
+  document.getElementById(ldrId).classList.add('on');
+  document.getElementById(resId).classList.remove('show');
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({model: 'claude-opus-4-5', max_tokens: 1500, system: sysprompt, messages: messages})
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    var text = '';
+    for (var i = 0; i < (data.content || []).length; i++) text += (data.content[i].text || '');
+    if (!text) text = 'No response received.';
+    document.getElementById(txtId).textContent = text;
+    document.getElementById(resId).classList.add('show');
+    document.getElementById(ldrId).classList.remove('on');
+    return text;
+  } catch (err) {
+    document.getElementById(txtId).textContent = 'Error: ' + err.message + '\n\nCheck your API key and account credits.';
+    document.getElementById(resId).classList.add('show');
+    document.getElementById(ldrId).classList.remove('on');
+    return null;
+  }
+}
+
+async function runAI() {
+  var active = null;
+  for (var i = 0; i < S.cycles.length; i++) if (S.cycles[i].active) { active = S.cycles[i]; break; }
+  var prompt = buildPrompt(active, S.checkins.slice(-10), S.bloodwork.slice(-3), S.metrics.slice(-7), gv('aiQ'));
+  var result = await callAI(
+    [{role: 'user', content: prompt}],
+    'You are CycleIQ, an expert harm-reduction AI for PED cycle analysis. Be direct, research-backed, and non-judgmental. Always recommend bloodwork and medical supervision. Use bullet points and clear sections.',
+    'aiLdr', 'aiRes', 'aiTxt'
+  );
+  if (result) {
+    S.aiHistory.unshift({date: today(), question: gv('aiQ') || 'General analysis', response: result});
+    addLog('ai', 'AI analysis generated');
+    saveState(); renderAIHist();
+  }
+}
+
+async function runCalcAI() {
+  var q = gv('calcQ').trim();
+  if (!q) { toast('Enter a question', 'var(--yw)'); return; }
+  await callAI(
+    [{role: 'user', content: q}],
+    'You are CycleIQ, expert in peptide reconstitution and injectable dosing. Answer clearly with step-by-step instructions. Include units, conversions, and safety notes.',
+    'calcLdr', 'calcRes', 'calcTxt'
+  );
+}
+
+function buildPrompt(cycle, checkins, bloodwork, metrics, question) {
+  var parts = [];
+
+  if (cycle) {
+    var comps = '';
+    for (var i = 0; i < cycle.compounds.length; i++) {
+      var c = cycle.compounds[i];
+      comps += '  - ' + c.name + ': ' + c.dose + c.unit + ' ' + c.frequency + ' ' + c.route + '\n';
+    }
+    parts.push('ACTIVE CYCLE: ' + cycle.name + ' (' + cycle.type + ')\nStart: ' + cycle.start + ' / ' + cycle.duration + ' wks\nCompounds:\n' + comps + (cycle.notes ? 'Notes: ' + cycle.notes : ''));
+  } else {
+    parts.push('NO ACTIVE CYCLE');
+  }
+
+  if (metrics.length) {
+    var m = metrics[metrics.length - 1];
+    parts.push('LATEST METRICS (' + m.date + '): Weight ' + (m.weight||'N/A') + ' lbs, BF ' + (m.bf||'N/A') + '%, BP ' + (m.bp||'N/A') + ', HR ' + (m.hr||'N/A') + ' bpm');
+  }
+
+  if (bloodwork.length) {
+    var b = bloodwork[bloodwork.length - 1];
+    parts.push('LATEST BLOODWORK (' + b.date + '):\nTT: ' + (b.TT||'N/A') + ' / FT: ' + (b.FT||'N/A') + ' / E2: ' + (b.E2||'N/A') + '\nHCT: ' + (b.HCT||'N/A') + '% / PSA: ' + (b.PSA||'N/A') + ' / LH: ' + (b.LH||'N/A') + '\nALT: ' + (b.ALT||'N/A') + ' / AST: ' + (b.AST||'N/A') + ' / IGF-1: ' + (b.IGF||'N/A') + (b.other ? '\nOther: ' + b.other : ''));
+  }
+
+  if (checkins.length) {
+    var totF = 0, totE = 0, totS = 0, totL = 0, totM = 0;
+    var allSym = [];
+    for (var i = 0; i < checkins.length; i++) {
+      totF += checkins[i].feeling || 0;
+      totE += checkins[i].energy || 0;
+      totS += checkins[i].sleep || 0;
+      totL += checkins[i].libido || 0;
+      totM += checkins[i].mood || 0;
+      if (checkins[i].symptoms) for (var j = 0; j < checkins[i].symptoms.length; j++) allSym.push(checkins[i].symptoms[j]);
+    }
+    var n = checkins.length;
+    var symC = {};
+    for (var i = 0; i < allSym.length; i++) symC[allSym[i]] = (symC[allSym[i]] || 0) + 1;
+    var symKeys = Object.keys(symC).sort(function(a,b){return symC[b]-symC[a];}).slice(0,5);
+    var topSym = symKeys.map(function(s){return s+'('+symC[s]+'x)';}).join(', ');
+    parts.push('RECENT CHECK-INS (' + n + '):\nAvg Feeling: ' + (totF/n).toFixed(1) + '/10, Energy: ' + (totE/n).toFixed(1) + '/10, Sleep: ' + (totS/n).toFixed(1) + '/10, Libido: ' + (totL/n).toFixed(1) + '/10, Mood: ' + (totM/n).toFixed(1) + '/10\nTop Symptoms: ' + (topSym || 'None'));
+  }
+
+  parts.push(question ? 'USER QUESTION: ' + question : 'REQUEST: Full protocol analysis and dosage optimization recommendations.');
+  return parts.join('\n\n');
+}
+
+function renderAIHist() {
+  var el = document.getElementById('aiHist');
+  if (!S.aiHistory.length) {
+    el.innerHTML = '<div class="empty"><div class="eico">&#9889;</div><div class="etxt">No analyses yet</div></div>';
+    return;
+  }
+  var html = '';
+  var items = S.aiHistory.slice(0, 8);
+  for (var i = 0; i < items.length; i++) {
+    var a = items[i];
+    html += '<div style="padding:13px 0;border-bottom:1px solid var(--bd2);">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">'
+      + '<div style="font-family:var(--fm);font-size:10px;color:var(--ac);">' + a.date + '</div>'
+      + '<div style="font-size:11px;color:var(--mt);">' + a.question.slice(0, 60) + '</div></div>'
+      + '<div style="font-size:12px;color:var(--mt);line-height:1.5;font-family:var(--fm);">' + a.response.slice(0, 180) + '...</div>'
+      + '<button class="btn bgh bsm" style="margin-top:7px;" onclick="expandAI(' + i + ')">View Full</button>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function expandAI(i) {
+  var a = S.aiHistory[i];
+  document.getElementById('aiTxt').textContent = a.response;
+  document.getElementById('aiRes').classList.add('show');
+  sv('aiQ', a.question);
+  showPage('ai');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// =============================================
+// CALCULATORS
+// =============================================
+function calcRecon() {
+  var vial = parseFloat(gv('rcVial'));
+  var water = parseFloat(gv('rcWater'));
+  var dose = parseFloat(gv('rcDose'));
+  var syr = parseInt(gv('rcSyr'));
+  var el = document.getElementById('rcRes');
+  if (!vial || !water || !dose) { el.classList.remove('show'); return; }
+  var concMcgMl = (vial * 1000) / water;
+  var mlPerDose = dose / concMcgMl;
+  var units = mlPerDose * syr;
+  var total = (vial * 1000) / dose;
+  el.classList.add('show');
+  document.getElementById('rcConc').textContent = concMcgMl.toFixed(1) + ' mcg/mL';
+  document.getElementById('rcUnits').textContent = units.toFixed(1) + ' IU';
+  document.getElementById('rcMl').textContent = mlPerDose.toFixed(3) + ' mL';
+  document.getElementById('rcDoses').textContent = Math.floor(total) + ' doses';
+  document.getElementById('rcDays').textContent = Math.floor(total) + ' days';
+}
+
+function calcDose() {
+  var conc = parseFloat(gv('dhConc'));
+  var dose = parseFloat(gv('dhDose'));
+  var el = document.getElementById('dhRes');
+  if (!conc || !dose) { el.classList.remove('show'); return; }
+  var ml = dose / conc;
+  el.classList.add('show');
+  document.getElementById('dhMl').textContent = ml.toFixed(3) + ' mL';
+  document.getElementById('dhU').textContent = (ml * 100).toFixed(1) + ' IU';
+  document.getElementById('dhW2').textContent = (dose * 2).toFixed(0) + ' mg/wk';
+  document.getElementById('dhW3').textContent = (dose * 3).toFixed(0) + ' mg/wk';
+  document.getElementById('dhM').textContent = (dose * 30).toFixed(0) + ' mg/mo';
+}
+
+// =============================================
+// BOOT - runs after DOM is fully parsed
+// =============================================
+(function boot() {
+  document.getElementById('hdrDate').textContent = new Date().toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+  var td = today();
+  sv('cycleStart', td);
+  sv('mDate', td);
+  sv('bwDate', td);
+  sv('apiKey1', apiKey);
+  sv('apiKey2', apiKey);
+  buildFeelingScale();
+  buildSymptomGrid();
+  addCompRow();
+  renderDash();
+  renderDoseBanner();
+})();
+</script>
+</body>
+</html>
